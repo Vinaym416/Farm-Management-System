@@ -9,11 +9,15 @@ import methodRoutes from './src/routes/methodRoutes.js';
 import displaymethodRoutes from './src/routes/displaymethodRoutes.js';
 import medianceRoutes from './src/routes/medianceRoutes.js';
 import displayRoutes from './src/routes/displayRoutes.js';
+import authRoutes from './src/routes/authRoutes.js';
+
+
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
 
 app.use(cors({ 
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
@@ -29,6 +33,11 @@ app.use('/api', methodRoutes);
 app.use('/api/display', displaymethodRoutes);
 app.use('/api', medianceRoutes);
 app.use('/api', displayRoutes);
+app.use('/api/auth', authRoutes);
+
+app.use('/uploads', express.static('uploads'));
+
+
 
 
 app.get('/test-db', (req, res) => {
@@ -39,6 +48,16 @@ app.get('/test-db', (req, res) => {
       return;
     }
     res.send(`Database connected successfully. Query result: ${results[0].solution}`);
+  });
+});
+
+app.get('/api/test-db', (req, res) => {
+  db.query('SELECT 1', (err, results) => {
+    if (err) {
+      console.error('Database connection error:', err);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+    res.json({ message: 'Database connected successfully' });
   });
 });
 

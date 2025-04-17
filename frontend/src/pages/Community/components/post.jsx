@@ -72,7 +72,7 @@ export function Post({ post }) {
           onClick={handleLike}
         >
           <Heart className="h-5 w-5" />
-          <span>{likes}</span>
+          <span>{post.likes?.length || 0}</span>
         </button>
         <button
           className="flex items-center space-x-2 hover:text-blue-500 transition"

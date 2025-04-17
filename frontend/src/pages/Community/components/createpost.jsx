@@ -1,85 +1,83 @@
 import React, { useState } from 'react';
-import { Send, Image as ImageIcon, X } from 'lucide-react';
 
-export function CreatePost({ onPost }) {
+export const CreatePost = ({ onPost }) => {
   const [content, setContent] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!content.trim()) return;
+    
+    onPost(content, image);
+    setContent('');
+    setImage(null);
+    setPreview('');
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
+      setImage(file);
       const reader = new FileReader();
-      reader.onload = () => setPreviewImage(reader.result);
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (content.trim()) {
-      const imageBase64 = previewImage || null;
-      onPost(content, imageBase64);
-      setContent('');
-      setImageFile(null);
-      setPreviewImage(null);
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Share your farming updates..."
-        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-        rows={3}
+        placeholder="What's on your mind?"
+        className="w-full p-4 border rounded-lg mb-4 min-h-[100px]"
+        required
       />
+      
+      <div className="flex items-center space-x-4">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+          id="image-upload"
+        />
+        <label
+          htmlFor="image-upload"
+          className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg"
+        >
+          Add Image
+        </label>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+        >
+          Post
+        </button>
+      </div>
 
-      {previewImage && (
-        <div className="mt-2 relative">
+      {preview && (
+        <div className="mt-4">
           <img
-            src={previewImage}
+            src={preview}
             alt="Preview"
-            className="w-full h-auto rounded-lg"
+            className="max-h-48 rounded-lg"
           />
           <button
             type="button"
             onClick={() => {
-              setImageFile(null);
-              setPreviewImage(null);
+              setImage(null);
+              setPreview('');
             }}
-            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
+            className="mt-2 text-red-500 hover:text-red-700"
           >
-            <X className="h-5 w-5" />
+            Remove Image
           </button>
         </div>
       )}
-
-      <div className="flex justify-between items-center mt-2">
-        <label
-          htmlFor="image-upload"
-          className="text-gray-500 hover:text-green-600 p-2 rounded-lg transition cursor-pointer flex items-center space-x-2"
-        >
-          <ImageIcon className="h-5 w-5" />
-          <span>Upload Image</span>
-        </label>
-        <input
-          id="image-upload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageChange}
-        />
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700 transition"
-        >
-          <Send className="h-4 w-4" />
-          <span>Post</span>
-        </button>
-      </div>
     </form>
   );
-}
+};

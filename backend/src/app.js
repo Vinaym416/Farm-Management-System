@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import methodRoutes from './routes/methodRoutes.js';
 import displaymethodRoutes from './routes/displaymethodRoutes.js';
+import displayRoute from './routes/displayRoute.js';
+import helpdeskRoutes from './routes/helpdeskRoutes.js';
 
 dotenv.config();
 
@@ -17,8 +19,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/helpdesk', helpdeskRoutes);
-
-// Use displaymethodRoutes for displaying methods
 app.use('/api/display', displaymethodRoutes);
 app.use('/api/methods', methodRoutes);
 app.use('/api', displayRoute);

@@ -6,11 +6,8 @@ const AdminDashboard = () => {
   const [adminName, setAdminName] = useState("");
 
   useEffect(() => {
-    // Get admin name from localStorage
-    const firstName = localStorage.getItem('firstName');
-    const lastName = localStorage.getItem('lastName');
-    const fullName = `${firstName} ${lastName}`;
-    setAdminName(fullName);
+    // Get admin user data from localStorage
+   
 
     const handlePopState = () => {
       navigate("/admin-login");
@@ -24,6 +21,8 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const handleSignOut = () => {
+    // Clear admin data from localStorage
+   
     navigate("/admin-login");
   };
 
@@ -36,7 +35,7 @@ const AdminDashboard = () => {
             "url('https://cdn.pixabay.com/photo/2017/08/06/07/33/field-2591506_1280.jpg')",
         }}
       >
-        <h1 className="text-black text-2xl font-bold">Hi {adminName}</h1>
+        <h1 className="text-black text-2xl font-bold"></h1>
         <h1 className="text-center text-black text-3xl mb-4 font-semibold">
           Welcome to the Admin Dashboard
         </h1>

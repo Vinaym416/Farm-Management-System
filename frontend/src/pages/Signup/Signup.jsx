@@ -49,7 +49,7 @@ const Signup = () => {
       });
       setMessage('Signup successful! Please login here.');
       setTimeout(() => {
-        navigate('/login');
+        navigate('/farmer-login#');
       }, 2000);
     } catch (error) {
       console.error('Error signing up:', error);

@@ -6,23 +6,27 @@ const AdminHelpdesk = () => {
   const [input, setInput] = useState('');
   const [adminName, setAdminName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
 
   const fetchMessages = async () => {
     try {
       setLoading(true);
       const loggedInAdmin = `${localStorage.getItem('firstName')} ${localStorage.getItem('lastName')}`;
       
-      const response = await axios.get(`http://localhost:3000/api/helpdesk/messages/${encodeURIComponent(loggedInAdmin)}`);
+      const response = await axios.get('http://localhost:3000/api/helpdesk/messages');
       
       if (response.data && Array.isArray(response.data)) {
-        // Map the messages based on the table structure
-        const formattedMessages = response.data.map(msg => ({
-          id: msg.message_id,
-          senderName: msg.sender_name,
-          adminName: msg.admin_name,
-          text: msg.message_text,
-          timestamp: new Date(msg.created_at).toLocaleString()
-        }));
+        const formattedMessages = response.data
+          .map(msg => ({
+            id: msg.message_id,
+            senderName: msg.sender_name,
+            adminName: msg.admin_name,
+            text: msg.message_text,
+            timestamp: new Date(msg.created_at).toLocaleString(),
+            isFromAdmin: msg.sender_name === loggedInAdmin
+          }))
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
         setMessages(formattedMessages);
       }
     } catch (error) {
@@ -40,17 +44,29 @@ const AdminHelpdesk = () => {
     fetchMessages();
   }, []);
 
+  const handleReply = (messageId) => {
+    const messageToReply = messages.find(msg => msg.id === messageId);
+    if (messageToReply) {
+      setReplyingTo(messageToReply);
+      setInput(`@${messageToReply.senderName} `);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (input.trim() && adminName) {
       try {
-        await axios.post('http://localhost:3000/api/helpdesk/messages', {
+        const messageData = {
           senderName: adminName,
           adminName: adminName,
-          messageText: input
-        });
+          messageText: input,
+          replyToId: replyingTo?.id || null  // Changed from replyToMessageId to replyToId
+        };
+
+        await axios.post('http://localhost:3000/api/helpdesk/messages', messageData);
         
         setInput('');
-        fetchMessages(); // Refresh messages after sending
+        setReplyingTo(null);
+        fetchMessages();
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -72,17 +88,17 @@ const AdminHelpdesk = () => {
           </div>
 
           <div className="h-[500px] overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50">
-            {messages.length > 0 ? (
+            {loading ? (
+              <div className="text-center text-gray-500">Loading messages...</div>
+            ) : messages.length > 0 ? (
               messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`mb-4 ${
-                    message.senderName === adminName ? 'text-right' : 'text-left'
-                  }`}
+                  className={`mb-4 ${message.isFromAdmin ? 'text-right' : 'text-left'}`}
                 >
                   <div
                     className={`inline-block max-w-[80%] p-4 rounded-lg ${
-                      message.senderName === adminName
+                      message.isFromAdmin
                         ? 'bg-indigo-500 text-white'
                         : 'bg-gray-200'
                     }`}
@@ -94,6 +110,14 @@ const AdminHelpdesk = () => {
                     <p className="text-xs mt-2 opacity-75">
                       {message.timestamp}
                     </p>
+                    {!message.isFromAdmin && (
+                      <button
+                        onClick={() => handleReply(message.id)}
+                        className="text-xs mt-2 underline hover:opacity-75"
+                      >
+                        Reply
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -102,21 +126,37 @@ const AdminHelpdesk = () => {
             )}
           </div>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Type your message..."
-              className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-            <button
-              onClick={handleSendMessage}
-              className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
-            >
-              Send
-            </button>
+          <div className="flex flex-col gap-2">
+            {replyingTo && (
+              <div className="text-sm text-gray-500 ml-2">
+                Replying to {replyingTo.senderName}
+                <button
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setInput('');
+                  }}
+                  className="ml-2 text-red-500 hover:text-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type your message..."
+                className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>
