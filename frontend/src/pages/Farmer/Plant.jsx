@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Camera, Upload, Loader2, Leaf } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 function Plant() {
   const [plantName, setPlantName] = useState("");
@@ -12,37 +12,12 @@ function Plant() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const response = await axios.post(
-          "http://localhost:5000/api/identify_plant_from_image",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        if (response.data["Plant Name"]) {
-          setPlantName(response.data["Plant Name"]);
-        } else {
-          alert("Failed to identify plant from the image.");
-        }
-      } catch (error) {
-        console.error("Error identifying plant:", error);
-        alert("An error occurred while identifying the plant.");
-      } finally {
-        setIsUploading(false);
-      }
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -75,46 +50,57 @@ function Plant() {
   };
 
   const fetchPlantDetails = async () => {
-    setLoading(true); // Show loading spinner
+    console.log("Starting fetchPlantDetails...");
+    setLoading(true);
     try {
-      let identifiedPlantName = plantName;
+      if (previewImage && fileInputRef.current && fileInputRef.current.files.length > 0) {
+        console.log("Image upload detected. Preparing to send image to server...");
+        const formData = new FormData();
+        const file = fileInputRef.current.files[0];
 
-      // If an image is uploaded, identify the plant name first
-      if (previewImage) {
-        const imageResponse = await axios.post(
-          "http://localhost:5000/api/identify_plant_from_image",
+        if (!file) {
+          alert("Please upload a valid image.");
+          setLoading(false);
+          return;
+        }
+
+        formData.append("image", file);
+
+        const response = await axios.post(
+          "http://127.0.0.1:5000/caption_image",
+          formData,
           {
-            image_url: previewImage,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           }
         );
 
-        if (imageResponse.data["Plant Name"]) {
-          identifiedPlantName = imageResponse.data["Plant Name"];
+        if (response.data.caption) {
+          setPlantDetails(response.data.caption);
         } else {
-          throw new Error("Failed to identify plant from the image.");
+          throw new Error("Failed to fetch plant details from the image.");
         }
-      }
+      } else if (plantName) {
+        console.log("Plant name entered. Sending name to server...");
+        const response = await axios.post(
+          "http://127.0.0.1:5000/describe_plant",
+          { plant_name: plantName }
+        );
 
-      // Fetch plant details using the identified plant name
-      const detailsResponse = await axios.post(
-        "http://localhost:5000/api/get_plant_details",
-        {
-          plant_name: identifiedPlantName,
+        if (response.data.description) {
+          setPlantDetails(response.data.description);
+        } else {
+          throw new Error("Failed to fetch plant details from the name.");
         }
-      );
-
-      if (detailsResponse.data["Plant Details"]) {
-        setPlantDetails(detailsResponse.data["Plant Details"]);
       } else {
-        throw new Error("Failed to fetch plant details.");
+        alert("Please provide a plant name or upload an image.");
       }
     } catch (error) {
       console.error("Error fetching plant details:", error);
-      alert(
-        "An error occurred while fetching plant details. Please try again."
-      );
+      alert("An error occurred while fetching plant details. Please try again.");
     } finally {
-      setLoading(false); // Hide loading spinner
+      setLoading(false);
     }
   };
 
@@ -140,7 +126,7 @@ function Plant() {
               />
             </div>
 
-            <div className="relative">
+            {/* <div className="relative">
               {previewImage ? (
                 <div className="relative group">
                   <img
@@ -208,17 +194,17 @@ function Plant() {
                   )}
                 </div>
               )}
-            </div>
+            </div> */}
 
             <button
               onClick={fetchPlantDetails}
               className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={(!plantName && !previewImage) || loading} // Disable button while loading
+              disabled={(!plantName && !previewImage) || loading}
             >
               {loading ? (
                 <Loader2 className="w-6 h-6 mx-auto animate-spin" />
               ) : (
-                "Enter"
+                "Get Info"
               )}
             </button>
           </div>

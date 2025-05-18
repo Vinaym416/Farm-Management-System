@@ -111,7 +111,7 @@ const AdminLogin = () => {
           zIndex: 0,
         }}
       />
-      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl opacity-90 transform transition-all duration-500 hover:scale-[1.02] w-full max-w-md left-28">
+      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-xl opacity-90 transform transition-all duration-500 hover:scale-[1.02] w-full max-w-md">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           {language === 'en' && 'Welcome Back, Admin!'}
           {language === 'kn' && 'ಮತ್ತೆ ಸ್ವಾಗತ, ನಿರ್ವಾಹಕ!'}
