@@ -126,76 +126,6 @@ function Plant() {
               />
             </div>
 
-            {/* <div className="relative">
-              {previewImage ? (
-                <div className="relative group">
-                  <img
-                    src={previewImage}
-                    alt="Plant preview"
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                    <button
-                      onClick={() => setPreviewImage(null)}
-                      className="text-white bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : showCamera ? (
-                <div className="relative">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={capturePhoto}
-                    className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white px-4 py-2 rounded-full hover:bg-emerald-600 transition-colors duration-300"
-                  >
-                    Capture
-                  </button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-500 transition-colors duration-300">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  {isUploading ? (
-                    <Loader2 className="w-12 h-12 mx-auto text-emerald-500 animate-spin" />
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex justify-center space-x-4">
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="flex items-center px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-300"
-                        >
-                          <Upload className="w-5 h-5 mr-2" />
-                          Upload Photo
-                        </button>
-                        <button
-                          onClick={startCamera}
-                          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
-                        >
-                          <Camera className="w-5 h-5 mr-2" />
-                          Take Photo
-                        </button>
-                      </div>
-                      <p className="text-gray-500">
-                        or drag and drop your image here
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div> */}
-
             <button
               onClick={fetchPlantDetails}
               className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -210,8 +140,8 @@ function Plant() {
           </div>
           <div className="flex flex-row items-center gap-96 mt-4">
             <div
-              className=" b-4 border-red-600  p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
-              onClick={() => navigate("/farmer/methods")} // Navigate to Methods
+              className="b-4 border-red-600 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
+              onClick={() => navigate("/farmer/methods")}
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/128/8898/8898495.png"
@@ -222,15 +152,15 @@ function Plant() {
             </div>
 
             <div
-              className=" b-4 border-red-600 p-4 bg-white bg-opacity-90 rounded  flex flex-col items-center cursor-pointer"
-              onClick={() => navigate("/farmer/medicine")} // Navigate to Medicine
+              className="b-4 border-red-600 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
+              onClick={() => navigate("/farmer/medicine")}
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/128/4006/4006511.png"
                 alt="Medicine"
                 className="mb-2"
               />
-              <span className="  font-medium text-lg">Medicine</span>
+              <span className="font-medium text-lg">Medicine</span>
             </div>
           </div>
         </div>
@@ -242,7 +172,14 @@ function Plant() {
             <h2 className="text-2xl font-bold text-emerald-700 mb-6">
               Plant Details
             </h2>
-            <p className="text-gray-700 whitespace-pre-line">{plantDetails}</p>
+            <p className="text-gray-700 whitespace-pre-line">
+              {plantDetails.split("*").map((line, index) => (
+                <React.Fragment key={index}>
+                  {line.trim()}
+                  <ul></ul>
+                </React.Fragment>
+              ))}
+            </p>
           </div>
         )}
       </div>

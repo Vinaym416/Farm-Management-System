@@ -28,6 +28,8 @@ import Community from "./pages/Community/Communitydash";
 import FarmerHelpdesk from "./pages/Farmer/Helpdesk";
 import AdminHelpdesk from "./pages/Admin/Helpdesk";
 import AddMediance from "./pages/Admin/Mediance";
+import ContactUs from "./pages/ContactUs";
+import About from "./pages/About";
 import "./App.css";
 
 function App() {
@@ -57,6 +59,8 @@ function App() {
           <Route path="/farmer/Helpdesk" element={<FarmerHelpdesk />} />
           <Route path="/admin/Helpdesk" element={<AdminHelpdesk />} />
           <Route path="/admin/mediance" element={<AddMediance />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </Router>
     </LanguageProvider>
