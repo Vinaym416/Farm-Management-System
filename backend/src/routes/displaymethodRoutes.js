@@ -1,5 +1,5 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
 
 const router = express.Router();
 
@@ -32,4 +32,4 @@ router.get('/methods/:plantName', (req, res) => {
   });
 });
 
-export default router;
+module.exports = router;

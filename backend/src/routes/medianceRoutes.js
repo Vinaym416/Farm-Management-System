@@ -1,5 +1,5 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.post('/add_mediance', (req, res) => {
   }
 
   const query = `
-    INSERT INTO mediance (mediance_id, name, plant_name, description) 
+    INSERT INTO mediance (medicineid, name, plantname, description) 
     VALUES (?, ?, ?, ?)
   `;
 
@@ -51,4 +51,4 @@ router.get('/get_mediance', async (req, res) => {
   });
 });
 
-export default router;
+module.exports = router;

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { helpdeskService } from "../../services/helpdeskService";
+import { toast } from "react-toastify";
+import io from 'socket.io-client';
 
+const socket = io('http://localhost:3000');
+const FARMER_ID = 1;
+const ADMIN_ID = 2;
 
 const FarmerHelpdesk = () => {
   const [messages, setMessages] = useState([]);
@@ -11,152 +16,104 @@ const FarmerHelpdesk = () => {
   const [replyingTo, setReplyingTo] = useState(null);
 
   useEffect(() => {
+    // Fetch initial messages using socket connection
+    socket.on('receiveMessage', (data) => {
+      if ((data.sender_id === FARMER_ID && data.receiver_id === ADMIN_ID) ||
+          (data.sender_id === ADMIN_ID && data.receiver_id === FARMER_ID)) {
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          text: data.message,
+          isFromAdmin: data.sender_id === ADMIN_ID,
+          senderName: data.sender_id === ADMIN_ID ? 'Admin' : 'You',
+          timestamp: new Date().toLocaleTimeString()
+        }]);
+      }
+    });
+
+    const fetchInitialMessages = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/messages/${FARMER_ID}/${ADMIN_ID}`);
+        const data = await response.json();
+        const formattedMessages = data.map(msg => ({
+          id: msg.id || Date.now(),
+          text: msg.message,
+          isFromAdmin: msg.sender_id === ADMIN_ID,
+          senderName: msg.sender_id === ADMIN_ID ? 'Admin' : 'You',
+          timestamp: new Date(msg.timestamp || Date.now()).toLocaleTimeString()
+        }));
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        toast.error("Failed to fetch messages");
+      }
+    };
+
+    fetchInitialMessages();
+    return () => socket.off('receiveMessage');
+  }, []);
+
+  useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/helpdesk/names"
-        );
-        setAdmins(response.data);
+        const response = await fetch('/api/helpdesk/names');
+        if (!response.ok) {
+          throw new Error('Failed to fetch admins');
+        }
+        const adminData = await response.json();
+        setAdmins(adminData);
       } catch (error) {
         console.error("Error fetching admins:", error);
+        toast.error("Failed to fetch admins");
       }
     };
 
     fetchAdmins();
   }, []);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (selectedAdmin) {
-        try {
-          setLoading(true);
-          const response = await axios.get(
-            "http://localhost:3000/api/helpdesk/messages"
-          );
-          
-          // Filter messages for the selected admin
-          const filteredMessages = response.data.filter(
-            msg => msg.admin_name === selectedAdmin
-          );
+  const handleSendMessage = () => {
+    if (input.trim() === '') return;
+    
+    // Emit message through socket
+    socket.emit('sendMessage', {
+      sender_id: FARMER_ID,
+      receiver_id: ADMIN_ID,
+      message: input
+    });
 
-          setMessages(
-            filteredMessages.map((msg) => ({
-              id: msg.message_id,
-              sender: msg.sender_name,
-              text: msg.message_text,
-              recipient: msg.admin_name,
-              timestamp: new Date(msg.created_at).toLocaleString(),
-              isFromAdmin: msg.sender_name === msg.admin_name, // Changed this line
-              replyToId: msg.reply_to_id,
-              repliedToText: msg.replied_to_text,
-              repliedToSender: msg.replied_to_sender
-            }))
-          );
-        } catch (error) {
-          console.error("Error fetching messages:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
+    // Add message to local state
+    const newMessage = {
+      id: Date.now(),
+      text: input,
+      isFromAdmin: false,
+      senderName: 'You',
+      timestamp: new Date().toLocaleTimeString(),
+      replyToId: replyingTo?.id || null,
+      repliedToText: replyingTo?.text || null,
+      repliedToSender: replyingTo?.senderName || null
     };
 
-    fetchMessages();
-  }, [selectedAdmin]);
+    setMessages(prev => [...prev, newMessage]);
+    setInput("");
+    setReplyingTo(null);
+    toast.success("Message sent successfully!");
+  };
 
-  const handleSendMessage = async () => {
-    if (input.trim() && selectedAdmin) {
-      try {
-        const messageData = {
-          senderName: "Farmer",
-          adminName: selectedAdmin,
-          messageText: input,
-          replyToId: replyingTo ? replyingTo.id : null  // Add this line
-        };
-
-        const response = await axios.post(
-          "http://localhost:3000/api/helpdesk/messages",
-          messageData
-        );
-
-        // Use the message ID returned from the server
-        const newMessage = {
-          id: response.data.messageId,
-          sender: "Farmer",
-          text: input,
-          recipient: selectedAdmin,
-          timestamp: new Date().toLocaleString(),
-          isFromAdmin: false,
-          replyToId: replyingTo ? replyingTo.id : null,  // Add this line
-          repliedToText: replyingTo ? replyingTo.text : null,  // Add this line
-          repliedToSender: replyingTo ? replyingTo.sender : null  // Add this line
-        };
-
-        setMessages([...messages, newMessage]);
-        setInput("");
-        setReplyingTo(null);  // Reset replyingTo after sending
-      } catch (error) {
-        console.error("Error sending message:", error);
-        alert("Failed to send message");
-      }
-    }
+  const handleReply = (message) => {
+    setReplyingTo(message);
+    setInput(`@${message.senderName} `);
   };
 
   const handleDeleteMessage = async (messageId) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/api/helpdesk/messages/${messageId}`
+      await helpdeskService.deleteMessage(messageId);
+      setMessages(prevMessages => 
+        prevMessages.filter(msg => msg.id !== messageId)
       );
-      
-      if (response.data.success){
-        setMessages(messages.filter((msg) => msg.id !== messageId));
-      } else {
-        throw new Error(response.data.error || 'Failed to delete message');
-      }
+      toast.success("Message deleted successfully!");
     } catch (error) {
       console.error("Error deleting message:", error);
-      alert(error.message || "Failed to delete message");
+      toast.error("Failed to delete message");
     }
-  };
-
-  const handleRefresh = async () => {
-    if (selectedAdmin) {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          "http://localhost:3000/api/helpdesk/messages"
-        );
-        
-        // Filter messages for the selected admin
-        const filteredMessages = response.data.filter(
-          msg => msg.admin_name === selectedAdmin
-        );
-
-        setMessages(
-          filteredMessages.map((msg) => ({
-            id: msg.message_id,
-            sender: msg.sender_name,
-            text: msg.message_text,
-            recipient: msg.admin_name,
-            timestamp: new Date(msg.created_at).toLocaleString(),
-            isFromAdmin: msg.sender_name === msg.admin_name, // Changed this line
-            replyToId: msg.reply_to_id,
-            repliedToText: msg.replied_to_text,
-            repliedToSender: msg.replied_to_sender
-          }))
-        );
-      } catch (error) {
-        console.error("Error refreshing messages:", error);
-        alert("Failed to refresh messages");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  // Add this new function in the FarmerHelpdesk component
-  const handleReply = (message) => {
-    setReplyingTo(message);
-    setInput(`Replying to: ${message.text.substring(0, 30)}... \n`);
   };
 
   return (
@@ -175,19 +132,25 @@ const FarmerHelpdesk = () => {
               {Array.isArray(admins) && admins.length > 0 ? (
                 admins.map((admin) => (
                   <button
-                    key={admin.id}
+                    key={admin._id}
                     onClick={() => setSelectedAdmin(admin.name)}
                     className={`w-full text-left px-4 py-2 rounded-lg border ${
                       selectedAdmin === admin.name
                         ? "bg-emerald-500 text-white"
-                        : "bg-gray-100"
+                        : "bg-gray-100 hover:bg-gray-200"
                     }`}
                   >
                     {admin.name}
+                    <span className="text-sm text-gray-500 ml-2">
+                      (Admin)
+                    </span>
                   </button>
                 ))
               ) : (
-                <p className="text-gray-500">Loading admins...</p>
+                <div className="text-center py-4">
+                  <div className="animate-spin inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
+                  <p className="text-gray-500 mt-2">Loading admins...</p>
+                </div>
               )}
             </div>
           </div>
@@ -199,7 +162,10 @@ const FarmerHelpdesk = () => {
                   Chat with {selectedAdmin}
                 </h2>
                 <button
-                  onClick={handleRefresh}
+                  onClick={() => {
+                    setLoading(true);
+                    setTimeout(() => setLoading(false), 1000);
+                  }}
                   disabled={loading}
                   className={`p-2 rounded-full hover:bg-gray-100 transition-colors
                     ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -243,16 +209,8 @@ const FarmerHelpdesk = () => {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-semibold text-sm">
-                              {msg.sender === "Farmer" ? "You" : msg.sender}
+                              {msg.isFromAdmin ? msg.senderName : 'You'}
                             </span>
-                            {msg.sender === "Farmer" && (
-                              <button
-                                onClick={() => handleDeleteMessage(msg.id)}
-                                className="ml-2 text-xs opacity-75 hover:opacity-100 text-white"
-                              >
-                                ×
-                              </button>
-                            )}
                           </div>
                           {msg.replyToId && (
                             <div className={`text-xs mb-2 p-2 rounded ${
@@ -269,6 +227,12 @@ const FarmerHelpdesk = () => {
                             {msg.timestamp}
                           </p>
                         </div>
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="text-red-500 text-xs mt-2"
+                        >
+                          Delete
+                        </button>
                       </div>
                     ))
                   ) : (

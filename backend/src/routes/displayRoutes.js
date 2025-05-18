@@ -1,5 +1,5 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
 
 const router = express.Router();
 
@@ -75,4 +75,4 @@ router.post('/display/medicine-details', (req, res) => {
     });
 });
 
-export default router;
+module.exports = router;

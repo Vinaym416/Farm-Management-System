@@ -1,157 +1,165 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
+const { Server } = require('socket.io');
+const http = require('http');
+const { helpdeskDbService } = require('../services/helpdeskDbService.js');
 
 const router = express.Router();
-
-router.get('/names', (req, res) => {
-  // Modified query to fetch from users1 table where role is admin
-  const query = 'SELECT id, firstName, lastName FROM users1 WHERE role = "admin" ORDER BY firstName';
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching admin names:', err);
-      return res.status(500).json({ error: 'Failed to fetch admin names' });
-    }
-    
-    // Format the results to include full name
-    const formattedResults = results.map(admin => ({
-      id: admin.id,
-      name: `${admin.firstName} ${admin.lastName}`
-    }));
-    
-    res.json(formattedResults);
-  });
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
-// Update the messages GET route to include complete reply information
-router.get('/messages', (req, res) => {
-  const query = `
-    SELECT 
-      m.message_id,
-      m.sender_name,
-      m.admin_name,
-      m.message_text,
-      m.created_at,
-      m.reply_to_id,
-      r.message_text as replied_to_text,
-      r.sender_name as replied_to_sender
-    FROM messages m
-    LEFT JOIN messages r ON m.reply_to_id = r.message_id
-    ORDER BY m.created_at ASC`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching messages:', err);
-      return res.status(500).json({ error: 'Failed to fetch messages' });
-    }
-
-    res.json(results);
-  });
-});
-
-// Update the post message route with logging:
-router.post('/messages', (req, res) => {
-  const { senderName, adminName, messageText, replyToId } = req.body;
-  
-  console.log('Received message data:', {
-    senderName,
-    adminName,
-    messageText,
-    replyToId
-  });
-
-  const query = 'INSERT INTO messages (sender_name, admin_name, message_text, reply_to_id) VALUES (?, ?, ?, ?)';
-  
-  db.query(query, [senderName, adminName, messageText, replyToId || null], (err, results) => {
-    if (err) {
-      console.error('Error storing message:', err);
-      return res.status(500).json({ error: 'Failed to store message' });
-    }
+// Get admin names
+router.get('/names', async (req, res) => {
+  try {
+    console.log('Fetching admin names...');
+    const admins = await helpdeskDbService.getAdmins();
+    console.log('Received admins from service:', admins);
     
-    res.status(201).json({
-      success: true,
-      message: 'Message stored successfully',
-      messageId: results.insertId
-    });
-  });
-});
-
-// Add this new endpoint to check all messages
-router.get('/debug/all-messages', (req, res) => {
-  const query = 'SELECT * FROM messages ORDER BY created_at DESC';
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching all messages:', err);
-      return res.status(500).json({ error: 'Failed to fetch messages' });
-    }
-    
-    console.log('Total messages found:', results.length);
-    res.json(results);
-  });
-});
-
-// Get all messages for helpdesk admin view
-router.get('/admin/messages', (req, res) => {
-  const query = `
-    SELECT 
-      m.message_id,
-      m.sender_name,
-      m.admin_name,
-      m.message_text,
-      m.created_at,
-      CONCAT(u.firstName, ' ', u.lastName) as admin_full_name
-    FROM messages m
-    LEFT JOIN users1 u ON m.admin_name = CONCAT(u.firstName, ' ', u.lastName)
-    ORDER BY m.created_at DESC`;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching admin messages:', err);
-      return res.status(500).json({ error: 'Failed to fetch admin messages' });
-    }
-    
-    console.log('Total admin messages found:', results.length);
-    res.json({
-      success: true,
-      messages: results
-    });
-  });
-});
-
-// Update the delete message endpoint
-router.delete('/messages/:messageId', (req, res) => {
-  const { messageId } = req.params;
-  
-  // First check if the message exists
-  const checkQuery = 'SELECT * FROM messages WHERE message_id = ?';
-  
-  db.query(checkQuery, [messageId], (err, results) => {
-    if (err) {
-      console.error('Error checking message:', err);
-      return res.status(500).json({ error: 'Failed to check message' });
-    }
-
-    if (results.length === 0) {
+    if (!admins || !admins.length) {
+      console.log('No admins found, sending 404');
       return res.status(404).json({ 
-        error: 'Message not found' 
+        error: 'No admins found',
+        message: 'No admin users exist in the database'
       });
     }
-
-    // If message exists, delete it
-    const deleteQuery = 'DELETE FROM messages WHERE message_id = ?';
-    db.query(deleteQuery, [messageId], (err) => {
-      if (err) {
-        console.error('Error deleting message:', err);
-        return res.status(500).json({ error: 'Failed to delete message' });
-      }
-
-      res.json({ 
-        success: true, 
-        message: 'Message deleted successfully' 
-      });
+    
+    console.log('Sending admins response:', admins);
+    res.json(admins);
+    
+  } catch (err) {
+    console.error('Detailed error in /names route:', err);
+    res.status(500).json({ 
+      error: 'Failed to fetch admin names',
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
+  }
+});
+
+// Get chat messages between users
+router.get('/messages/:users1/:user2', async (req, res) => {
+  try {
+    const { users1, user2 } = req.params;
+    const query = `
+      SELECT m.*, 
+        u1.firstName as sender_firstName, 
+        u1.lastName as sender_lastName,
+        u2.firstName as receiver_firstName, 
+        u2.lastName as receiver_lastName
+      FROM messages m
+      JOIN users1 u1 ON m.sender_id = u1.id
+      JOIN users1 u2 ON m.receiver_id = u2.id
+      WHERE (sender_id = ? AND receiver_id = ?)
+         OR (sender_id = ? AND receiver_id = ?)
+      ORDER BY timestamp ASC
+    `;
+
+    const messages = await helpdeskDbService.query(query, [users1, user2, user2, users1]);
+    res.json(messages);
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// Get admin list
+router.get('/admins', async (req, res) => {
+  try {
+    const admins = await helpdeskDbService.getAdmins();
+    res.json(admins);
+  } catch (err) {
+    console.error('Error fetching admins:', err);
+    res.status(500).json({ error: 'Failed to fetch admins' });
+  }
+});
+
+
+router.post('/messages', async (req, res) => {
+  try {
+    const { sender_id, receiver_id, message } = req.body;
+    const query = `
+      INSERT INTO messages (sender_id, receiver_id, message)
+      VALUES (?, ?, ?)
+    `;
+    
+    await helpdeskDbService.query(query, [sender_id, receiver_id, message]);
+    res.status(201).json({ success: true, message: 'Message stored successfully' });
+  } catch (err) {
+    console.error('Error storing message:', err);
+    res.status(500).json({ error: 'Failed to store message' });
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log("✅ New user connected");
+
+  socket.on('sendMessage', async ({ sender_id, receiver_id, message }) => {
+    try {
+      const query = `
+        INSERT INTO messages (sender_id, receiver_id, message)
+        VALUES (?, ?, ?)
+      `;
+      
+      await helpdeskDbService.query(query, [sender_id, receiver_id, message]);
+
+      // Get sender and receiver details from users1 table
+      const userQuery = `
+        SELECT id, firstName, lastName, role 
+        FROM users1 
+        WHERE id IN (?, ?)
+      `;
+      
+      const users = await helpdeskDbService.query(userQuery, [sender_id, receiver_id]);
+      const sender = users.find(u => u.id === sender_id);
+      const receiver = users.find(u => u.id === receiver_id);
+
+      // Broadcast with user details
+      io.emit('receiveMessage', {
+        sender_id,
+        receiver_id,
+        message,
+        timestamp: new Date(),
+        sender_name: `${sender.firstName} ${sender.lastName}`,
+        receiver_name: `${receiver.firstName} ${receiver.lastName}`,
+        sender_role: sender.role,
+        receiver_role: receiver.role
+      });
+
+    } catch (err) {
+      console.error('Error handling socket message:', err);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log("❌ User disconnected");
   });
 });
 
-export default router;
+// Delete message
+router.delete('/messages/:messageId', async (req, res) => {
+  try {
+    const deleted = await helpdeskDbService.deleteMessage(req.params.messageId);
+    if (deleted) {
+      res.json({ success: true, message: 'Message deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Message not found' });
+    }
+  } catch (err) {
+    console.error('Error deleting message:', err);
+    res.status(500).json({ error: 'Failed to delete message' });
+  }
+});
+
+// Start the server
+// const PORT = process.env.PORT || 3000;
+// server.listen(PORT, () => {
+//   console.log(`🚀 Helpdesk backend running on http://localhost:${PORT}`);
+// });
+
+module.exports = router;

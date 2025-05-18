@@ -12,10 +12,10 @@ function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen"
+      className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100"
     >
       {/* Navbar */}
-      <nav className="relative bg-green-900 text-white p-4 top-0 left-0 w-full z-10">
+      <nav className="relative bg-green-900 text-white p-4 top-0 left-0 w-full z-10 shadow-lg">
         <ul className="flex justify-around items-center">
           <li className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
             <Link to="/">{language === 'en' ? 'Home' : language === 'kn' ? 'ಮನೆ' : 'होम'}</Link>
@@ -76,14 +76,6 @@ function Home() {
             className="flex justify-center space-x-4"
           >
             <Link
-              to="/get-started"
-              className="bg-white text-green-800 px-8 py-3 rounded-lg font-semibold hover:bg-green-100 transition-colors"
-            >
-              {language === 'en' && 'Get Started'}
-              {language === 'kn' && 'ಪ್ರಾರಂಭಿಸಿ'}
-              {language === 'hi' && 'शुरू करें'}
-            </Link>
-            <Link
               to="/farmer-login"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
             >
@@ -112,22 +104,22 @@ function Home() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           <FeatureCard
-            icon={<Plant className="h-8 w-8" />}
+            icon={<Plant className="h-8 w-8 text-emerald-500" />}
             title="Crop Management"
             description="Track and optimize your crop cycles from planting to harvest"
           />
           <FeatureCard
-            icon={<Tractor className="h-8 w-8" />}
+            icon={<Tractor className="h-8 w-8 text-emerald-500" />}
             title="Equipment Tracking"
             description="Monitor equipment maintenance and usage efficiently"
           />
           <FeatureCard
-            icon={<Users className="h-8 w-8" />}
+            icon={<Users className="h-8 w-8 text-emerald-500" />}
             title="Worker Management"
             description="Manage your workforce and assign tasks effectively"
           />
           <FeatureCard
-            icon={<CloudRain className="h-8 w-8" />}
+            icon={<CloudRain className="h-8 w-8 text-emerald-500" />}
             title="Weather Integration"
             description="Stay updated with real-time weather forecasts"
           />
@@ -141,7 +133,7 @@ function FeatureCard({ icon, title, description }) {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="bg-white p-6 rounded-xl shadow-lg"
+      className="bg-white p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:shadow-2xl"
     >
       <div className="text-green-600 mb-4">{icon}</div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>

@@ -1,6 +1,6 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -137,4 +137,4 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

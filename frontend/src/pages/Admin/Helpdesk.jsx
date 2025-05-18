@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { helpdeskService } from "../../services/helpdeskService";
+import { toast } from "react-toastify";
+import io from 'socket.io-client';
 import axios from 'axios';
+
+const socket = io('http://localhost:3000');
+const ADMIN_ID = 2;
+const FARMER_ID = 1;
 
 const AdminHelpdesk = () => {
   const [messages, setMessages] = useState([]);
@@ -8,41 +15,52 @@ const AdminHelpdesk = () => {
   const [loading, setLoading] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
 
-  const fetchMessages = async () => {
-    try {
-      setLoading(true);
-      const loggedInAdmin = `${localStorage.getItem('firstName')} ${localStorage.getItem('lastName')}`;
-      
-      const response = await axios.get('http://localhost:3000/api/helpdesk/messages');
-      
-      if (response.data && Array.isArray(response.data)) {
-        const formattedMessages = response.data
-          .map(msg => ({
-            id: msg.message_id,
-            senderName: msg.sender_name,
-            adminName: msg.admin_name,
-            text: msg.message_text,
-            timestamp: new Date(msg.created_at).toLocaleString(),
-            isFromAdmin: msg.sender_name === loggedInAdmin
-          }))
-          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        
-        setMessages(formattedMessages);
-      }
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     const firstName = localStorage.getItem('firstName');
     const lastName = localStorage.getItem('lastName');
     const fullName = `${firstName} ${lastName}`.trim();
     setAdminName(fullName);
-    fetchMessages();
-  }, []);
+
+    // Fetch initial messages using socket/axios
+    const fetchInitialMessages = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:3000/messages/${ADMIN_ID}/${FARMER_ID}`);
+        const formattedMessages = response.data.map(msg => ({
+          id: msg.id || Date.now(),
+          text: msg.message,
+          senderName: msg.sender_id === ADMIN_ID ? adminName : 'Farmer',
+          isFromAdmin: msg.sender_id === ADMIN_ID,
+          timestamp: new Date(msg.timestamp || Date.now()).toLocaleTimeString()
+        }));
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        toast.error("Failed to fetch messages");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialMessages();
+
+    // Socket listener for new messages
+    socket.on('receiveMessage', (data) => {
+      if ((data.sender_id === ADMIN_ID && data.receiver_id === FARMER_ID) ||
+          (data.sender_id === FARMER_ID && data.receiver_id === ADMIN_ID)) {
+        const newMessage = {
+          id: Date.now(),
+          text: data.message,
+          senderName: data.sender_id === ADMIN_ID ? adminName : 'Farmer',
+          isFromAdmin: data.sender_id === ADMIN_ID,
+          timestamp: new Date().toLocaleTimeString()
+        };
+        setMessages(prev => [...prev, newMessage]);
+      }
+    });
+
+    return () => socket.off('receiveMessage');
+  }, [adminName]);
 
   const handleReply = (messageId) => {
     const messageToReply = messages.find(msg => msg.id === messageId);
@@ -55,20 +73,32 @@ const AdminHelpdesk = () => {
   const handleSendMessage = async () => {
     if (input.trim() && adminName) {
       try {
-        const messageData = {
+        // Emit message through socket
+        socket.emit('sendMessage', {
+          sender_id: ADMIN_ID,
+          receiver_id: FARMER_ID,
+          message: input
+        });
+
+        // Add message to local state
+        const newMessage = {
+          id: Date.now(),
+          text: input,
           senderName: adminName,
-          adminName: adminName,
-          messageText: input,
-          replyToId: replyingTo?.id || null  // Changed from replyToMessageId to replyToId
+          isFromAdmin: true,
+          timestamp: new Date().toLocaleTimeString(),
+          replyToId: replyingTo?.id || null,
+          repliedToText: replyingTo?.text || null,
+          repliedToSender: replyingTo?.senderName || null
         };
 
-        await axios.post('http://localhost:3000/api/helpdesk/messages', messageData);
-        
+        setMessages(prev => [...prev, newMessage]);
         setInput('');
         setReplyingTo(null);
-        fetchMessages();
+        toast.success("Message sent successfully!");
       } catch (error) {
         console.error('Error sending message:', error);
+        toast.error("Failed to send message");
       }
     }
   };
@@ -80,7 +110,10 @@ const AdminHelpdesk = () => {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Message Board</h1>
             <button
-              onClick={fetchMessages}
+              onClick={() => {
+                setLoading(true);
+                setMessages([]);
+              }}
               className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
             >
               Refresh

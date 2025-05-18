@@ -1,5 +1,5 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
 
 const router = express.Router();
 
@@ -59,4 +59,4 @@ router.post('/add_method', (req, res) => {  // Remove /api prefix
   });
 });
 
-export default router;
+module.exports = router;

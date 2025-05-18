@@ -21,32 +21,84 @@ const AdminSignup = () => {
     id: '',
     role: 'admin'
   });
-  const [message, setMessage] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    const { firstName, lastName, email, password, postCode, phoneNumber, designation, id } = formData;
+
+    if (!firstName || !lastName || !email || !password || !postCode || !phoneNumber || !designation || !id) {
+      setAlertMessage(language === 'en' ? 'All fields are required.' :
+                      language === 'kn' ? 'ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಬೇಕು.' :
+                      'सभी फ़ील्ड भरना अनिवार्य है।');
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAlertMessage(language === 'en' ? 'Invalid email address.' :
+                      language === 'kn' ? 'ಅಮಾನ್ಯ ಇಮೇಲ್ ವಿಳಾಸ.' :
+                      'अमान्य ईमेल पता।');
+      return false;
+    }
+
+    if (password.length < 3 || password.length > 8) {
+      setAlertMessage(language === 'en' ? 'Password must be between 3 and 8 characters.' :
+                      language === 'kn' ? 'ಪಾಸ್ವರ್ಡ್ 3 ರಿಂದ 8 ಅಕ್ಷರಗಳ ನಡುವೆ ಇರಬೇಕು.' :
+                      'पासवर्ड 3 से 8 वर्णों के बीच होना चाहिए।');
+      return false;
+    }
+
+    if (!/^\d{6}$/.test(postCode)) {
+      setAlertMessage(language === 'en' ? 'Post code must be exactly 6 digits.' :
+                      language === 'kn' ? 'ಪೋಸ್ಟ್ ಕೋಡ್ 6 ಅಂಕೆಗಳಾಗಿರಬೇಕು.' :
+                      'पोस्ट कोड ठीक 6 अंकों का होना चाहिए।');
+      return false;
+    }
+
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      setAlertMessage(language === 'en' ? 'Phone number must be exactly 10 digits.' :
+                      language === 'kn' ? 'ಫೋನ್ ಸಂಖ್ಯೆ 10 ಅಂಕೆಗಳಾಗಿರಬೇಕು.' :
+                      'फोन नंबर ठीक 10 अंकों का होना चाहिए।');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password.length < 3 || formData.password.length > 8) {
-      setMessage('Password must be between 3 and 8 characters.');
-      return;
-    }
+    if (!validateForm()) return;
+
     try {
       const response = await axios.post('http://localhost:3000/signup', formData);
-      setMessage('Signup successful! Please login here.');
+      setAlertMessage(language === 'en' ? 'Signup successful! Please login here.' :
+                      language === 'kn' ? 'ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ! ದಯವಿಟ್ಟು ಇಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಿ.' :
+                      'साइनअप सफल हुआ! कृपया यहां लॉगिन करें।');
       setTimeout(() => {
         navigate('/admin-login');
       }, 2000);
     } catch (error) {
       console.error('Error signing up:', error);
-      setMessage('Signup failed');
+      setAlertMessage(language === 'en' ? 'Signup failed. Please try again.' :
+                      language === 'kn' ? 'ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.' :
+                      'साइनअप विफल हुआ। कृपया पुनः प्रयास करें।');
     }
   };
 
   return (
     <div className="bg-[url('https://www.shutterstock.com/image-photo/banker-officer-making-notes-about-600nw-2287782837.jpg')] bg-cover bg-center h-screen flex justify-center items-center">
+      {/* Alert Message at the Top */}
+      <div className="absolute top-0 right-0 p-4">
+        {alertMessage && (
+          <div className="bg-red-500 text-white text-center py-2 rounded">
+            {alertMessage}
+          </div>
+        )}
+      </div>
+
       <div className="bg-white p-8 rounded shadow-md opacity-80" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', width: '550px', marginTop: '10%', marginRight: '40%' }}>
         <h1 className="text-2xl font-bold mb-4 text-center">
           {language === 'en' && 'Admin Signup'}
@@ -106,7 +158,6 @@ const AdminSignup = () => {
             </button>
           </div>
         </form>
-        {message && <p className="text-center mt-4">{message}</p>}
       </div>
     </div>
   );

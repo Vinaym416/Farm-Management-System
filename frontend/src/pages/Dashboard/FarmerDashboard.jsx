@@ -45,7 +45,6 @@ const FarmerDashboard = () => {
         windDirection: data.wind.deg,
         rainPrediction: data.weather[0].description,
         rainfallAmount: data.rain ? `${data.rain["1h"]} mm` : "0 mm",
-        // soilMoisture: 'N/A', // Soil moisture data is not available from OpenWeatherMap
       });
     };
 
@@ -68,7 +67,7 @@ const FarmerDashboard = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-500 flex flex-col">
       <header
         className="flex justify-between items-center p-4 bg-cover bg-center"
         style={{
@@ -84,19 +83,18 @@ const FarmerDashboard = () => {
         </h1>
         <button
           onClick={handleSignOut}
-          className="bg-red-500 text-white p-2 rounded font-medium"
+          className="bg-red-500 text-white p-2 rounded font-medium hover:bg-red-600 transition-all duration-300"
         >
           Sign Out
         </button>
       </header>
 
-      <div className="flex-grow bg-cover bg-center bg-opacity-100 bg-black">
-        <main className="p-4 flex flex-col items-center  h-full gap-20">
-          <div className="mt-8 p-4 bg-white bg-opacity-50 rounded w-full">
+      <div className="flex-grow bg-cover bg-center">
+          <div className="mt-8 p-4 bg-gray-100 bg-opacity-90 rounded-lg shadow-lg w-full ">
             <h2 className="text-center text-3xl mb-4 font-semibold">
               Real-Time Weather Forecast
             </h2>
-            <div className="flex justify-around text-lg opacity-90">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-lg">
               <div className="flex flex-col items-center">
                 <img
                   src="https://cdn-icons-png.flaticon.com/128/14210/14210283.png"
@@ -137,6 +135,15 @@ const FarmerDashboard = () => {
                 </span>
               </div>
               <div className="flex flex-col items-center">
+                
+                <span className="font-medium">
+                 
+                </span>
+                <span className="font-medium">
+                 
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
                 <img
                   src="https://cdn-icons-png.flaticon.com/128/14828/14828765.png"
                   alt="Umbrella"
@@ -151,9 +158,11 @@ const FarmerDashboard = () => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-40">
+        <main className="p-4 flex flex-col items-center gap-10">
+        
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div
-              className="border-4 border-green-700 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
+              className="border-4 border-green-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
               onClick={() => navigate("/Plant")}
             >
               <img
@@ -163,35 +172,23 @@ const FarmerDashboard = () => {
               />
               <span className="font-medium text-lg">Plants</span>
             </div>
-            {/* <div className="border-4 border-blue-700 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
-                 onClick={() => navigate('/farmer/medicine')}>
-              <img src="https://cdn-icons-png.flaticon.com/128/4006/4006511.png" alt="Medicine" className="mb-2" />
-              <span className="font-medium text-lg">Medicine</span>
-            </div> */}
-            {/* <div className="border-4 border-yellow-700 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
-                 onClick={() => navigate('/farmer/methods')}>
-              <img src="https://cdn-icons-png.flaticon.com/128/8898/8898495.png" alt="Methods" className="mb-2" />
-              <span className="font-medium text-lg">Methods</span>
-            </div> */}
-
-<div
-  className="border-4 border-orange-700 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
-  onClick={() =>
-    navigate("/Community/communitydash", {
-      state: { user: { name: "John Farmer", role: "farmer" } },
-    })
-  }
->
-  <img
-    src="https://cdn-icons-png.flaticon.com/128/3365/3365355.png"
-    alt="Community"
-    className="mb-2"
-  />
-  <span className="font-medium text-lg">Community</span>
-</div>
-
             <div
-              className="border-4 border-red-700 p-4 bg-white bg-opacity-90 rounded flex flex-col items-center cursor-pointer"
+              className="border-4 border-orange-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
+              onClick={() =>
+                navigate("/Community/communitydash", {
+                  state: { user: { name: "John Farmer", role: "farmer" } },
+                })
+              }
+            >
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/3365/3365355.png"
+                alt="Community"
+                className="mb-2"
+              />
+              <span className="font-medium text-lg">Community</span>
+            </div>
+            <div
+              className="border-4 border-red-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
               onClick={() => navigate("/farmer/helpdesk")}
             >
               <img
@@ -201,17 +198,16 @@ const FarmerDashboard = () => {
               />
               <span className="font-medium text-lg">Connect to Helpdesk</span>
             </div>
-
-            <div
-              className="fixed bottom-4 right-4 w-20 h-20 bg-purple-700 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform duration-300"
-              onClick={() => navigate("/farmer/ai-assistant")} // Navigate to AI Assistant
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/128/14958/14958196.png"
-                alt="AI Assistant"
-                className="w-12 h-12"
-              />
-            </div>
+          </div>
+          <div
+            className="fixed bottom-4 right-4 w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform duration-300"
+            onClick={() => navigate("/farmer/ai-assistant")}
+          >
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/14958/14958196.png"
+              alt="AI Assistant"
+              className="w-10 h-10"
+            />
           </div>
         </main>
       </div>

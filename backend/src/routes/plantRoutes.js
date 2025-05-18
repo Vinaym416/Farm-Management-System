@@ -1,5 +1,5 @@
-import express from 'express';
-import db from '../config/dbConfig.js';
+const express = require('express');
+const db = require('../config/dbConfig.js')
 
 const router = express.Router();
 
@@ -67,4 +67,4 @@ router.post('/get_plant_details', async (req, res) => {
     }
 });
 
-export default router;
+module.exports = router;

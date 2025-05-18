@@ -1,23 +1,78 @@
-import express from 'express';
-import db from './src/config/dbConfig.js';
-import dotenv from 'dotenv';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import plantRoutes from './src/routes/plantRoutes.js';
-import helpdeskRoutes from './src/routes/helpdeskRoutes.js';
-import methodRoutes from './src/routes/methodRoutes.js';
-import displaymethodRoutes from './src/routes/displaymethodRoutes.js';
-import medianceRoutes from './src/routes/medianceRoutes.js';
-import displayRoutes from './src/routes/displayRoutes.js';
-import authRoutes from './src/routes/authRoutes.js';
-
-
+const express = require('express');
+const db = require('./src/config/dbConfig.js');
+const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const plantRoutes = require('./src/routes/plantRoutes.js');
+const helpdeskRoutes = require('./src/routes/helpdeskRoutes.js');
+const methodRoutes = require('./src/routes/methodRoutes.js');
+const displaymethodRoutes = require('./src/routes/displaymethodRoutes.js');
+const medianceRoutes = require('./src/routes/medianceRoutes.js');
+const displayRoutes = require('./src/routes/displayRoutes.js');
+const authRoutes = require('./src/routes/authRoutes.js');
+const { Server } = require('socket.io');
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    methods: ["GET", "POST"]
+  }
+});
+
+// Socket.IO logic
+io.on('connection', (socket) => {
+  console.log(" New user connected");
+
+  socket.on('sendMessage', async ({ sender_id, receiver_id, message }) => {
+    try {
+      const query = `
+        INSERT INTO messages (sender_id, receiver_id, message)
+        VALUES (?, ?, ?)
+      `;
+      
+      await helpdeskDbService.query(query, [sender_id, receiver_id, message]);
+
+      // Get sender and receiver details from users1 table
+      const userQuery = `
+        SELECT id, firstName, lastName, role 
+        FROM users1 
+        WHERE id IN (?, ?)
+      `;
+      
+      const users = await helpdeskDbService.query(userQuery, [sender_id, receiver_id]);
+      const sender = users.find(u => u.id === sender_id);
+      const receiver = users.find(u => u.id === receiver_id);
+
+      // Broadcast with user details
+      io.emit('receiveMessage', {
+        sender_id,
+        receiver_id,
+        message,
+        timestamp: new Date(),
+        sender_name: `${sender.firstName} ${sender.lastName}`,
+        receiver_name: `${receiver.firstName} ${receiver.lastName}`,
+        sender_role: sender.role,
+        receiver_role: receiver.role
+      });
+
+    } catch (err) {
+      console.error('Error handling socket message:', err);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(" User disconnected");
+  });
+});
 
 app.use(cors({ 
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
@@ -36,9 +91,6 @@ app.use('/api', displayRoutes);
 app.use('/api/auth', authRoutes);
 
 app.use('/uploads', express.static('uploads'));
-
-
-
 
 app.get('/test-db', (req, res) => {
   db.query('SELECT 1 + 1 AS solution', (err, results) => {
@@ -115,10 +167,6 @@ app.post('/api/add_plant', (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
 // SQL query to create the users1 table
 const createUsersTableQuery = `
 CREATE TABLE users1 (
@@ -148,7 +196,6 @@ db.query(createUsersTableQuery, (err, results) => {
   }
   console.log('Users1 table created successfully');
 });
-
 
 // Add this after your existing users1 table creation
 // Replace the plants table creation code with this:
