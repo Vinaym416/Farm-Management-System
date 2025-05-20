@@ -21,7 +21,7 @@ import Plant from "./pages/Farmer/Plant";
 import Medicine from "./pages/farmer/Medicine";
 import Methods from "./pages/farmer/Methods";
 import AIAssistant from "./pages/farmer/AIAssistant";
-import Helpdesk from "./pages/Farmer/Helpdesk";
+
 import Addplant from "./pages/Admin/Addplant";
 import AddMethod from "./pages/Admin/Addmethod";
 import Community from "./pages/Community/Communitydash";
@@ -30,6 +30,7 @@ import AdminHelpdesk from "./pages/Admin/Helpdesk";
 import AddMediance from "./pages/Admin/Mediance";
 import ContactUs from "./pages/ContactUs";
 import About from "./pages/About";
+import Helpdesk from "./pages/Helpdesk";
 import "./App.css";
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/admin/mediance" element={<AddMediance />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/about" element={<About />} />
+          <Route path="/helpdesk" element={<Helpdesk />} />
         </Routes>
       </Router>
     </LanguageProvider>

@@ -12,7 +12,7 @@ export function Header({ currentUser }) {
         <div className="flex items-center space-x-4">
           <span className="flex items-center space-x-2">
             <User2 className="h-5 w-5" />
-            <span>{currentUser.name}</span>
+            
             <span className="bg-green-700 px-2 py-1 rounded-full text-sm">
               {currentUser.role}
             </span>

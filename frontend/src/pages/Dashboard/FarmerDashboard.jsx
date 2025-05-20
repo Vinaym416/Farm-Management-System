@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const FarmerDashboard = () => {
   const { language } = useContext(LanguageContext);
   const navigate = useNavigate();
-  const firstName = "John"; // Replace with the actual first name from your context or state
+  const firstName = "Farmer"; 
 
   const [weather, setWeather] = useState({
     temp: "Loading...",
@@ -77,9 +77,9 @@ const FarmerDashboard = () => {
       >
         <h1 className="text-black text-2xl font-bold">Hi {firstName}</h1>
         <h1 className="text-center text-black text-3xl mb-4 font-semibold">
-          {language === "en" && "Welcome to the Farmer Dashboard"}
-          {language === "kn" && "ಕೃಷಿಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಸ್ವಾಗತ"}
-          {language === "hi" && "किसान डैशबोर्ड में आपका स्वागत है"}
+          {language === "en" && `Welcome to the Farmer Dashboard `}
+          {language === "kn" && `ಕೃಷಿಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಸ್ವಾಗತ `}
+          {language === "hi" && `किसान डैशबोर्ड में आपका स्वागत है `}
         </h1>
         <button
           onClick={handleSignOut}
@@ -90,76 +90,66 @@ const FarmerDashboard = () => {
       </header>
 
       <div className="flex-grow bg-cover bg-center">
-          <div className="mt-8 p-4 bg-gray-100 bg-opacity-90 rounded-lg shadow-lg w-full ">
-            <h2 className="text-center text-3xl mb-4 font-semibold">
-              Real-Time Weather Forecast
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-lg">
-              <div className="flex flex-col items-center">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/14210/14210283.png"
-                  alt="Thermostat"
-                  className="w-12 h-12 mb-2"
-                />
-                <span className="font-medium">Temp: {weather.temp}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/8923/8923690.png"
-                  alt="Water Drop"
-                  className="w-12 h-12 mb-2"
-                />
-                <span className="font-medium">
-                  Humidity: {weather.humidity}
-                </span>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/3563/3563395.png"
-                  alt="Speed"
-                  className="w-12 h-12 mb-2"
-                />
-                <span className="font-medium">
-                  Pressure: {weather.pressure}
-                </span>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/4324/4324144.png"
-                  alt="Air"
-                  className="w-12 h-12 mb-2"
-                />
-                <span className="font-medium">Wind: {weather.wind}</span>
-                <span className="font-medium">
-                  Direction: {weather.windDirection}
-                </span>
-              </div>
-              <div className="flex flex-col items-center">
-                
-                <span className="font-medium">
-                 
-                </span>
-                <span className="font-medium">
-                 
-                </span>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/14828/14828765.png"
-                  alt="Umbrella"
-                  className="w-12 h-12 mb-2"
-                />
-                <span className="font-medium">
-                  Rain Prediction: {weather.rainPrediction}
-                </span>
-                <span className="font-medium">
-                  Amount: {weather.rainfallAmount}
-                </span>
-              </div>
+        <div className="mt-8 p-4 bg-gray-100 bg-opacity-90 rounded-lg shadow-lg w-full ">
+          <h2 className="text-center text-3xl mb-4 font-semibold">
+            Real-Time Weather Forecast
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-lg">
+            <div className="flex flex-col items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/14210/14210283.png"
+                alt="Thermostat"
+                className="w-12 h-12 mb-2"
+              />
+              <span className="font-medium">Temp: {weather.temp}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/8923/8923690.png"
+                alt="Water Drop"
+                className="w-12 h-12 mb-2"
+              />
+              <span className="font-medium">
+                Humidity: {weather.humidity}
+              </span>
+            </div>
+            <div className="flex flex-col items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/3563/3563395.png"
+                alt="Speed"
+                className="w-12 h-12 mb-2"
+              />
+              <span className="font-medium">
+                Pressure: {weather.pressure}
+              </span>
+            </div>
+            <div className="flex flex-col items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/4324/4324144.png"
+                alt="Air"
+                className="w-12 h-12 mb-2"
+              />
+              <span className="font-medium">Wind: {weather.wind}</span>
+              <span className="font-medium">
+                Direction: {weather.windDirection}
+              </span>
+            </div>
+            <div className="flex flex-col items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/14828/14828765.png"
+                alt="Umbrella"
+                className="w-12 h-12 mb-2"
+              />
+              <span className="font-medium">
+                Rain Prediction: {weather.rainPrediction}
+              </span>
+              <span className="font-medium">
+                Amount: {weather.rainfallAmount}
+              </span>
             </div>
           </div>
+        </div>
         <main className="p-4 flex flex-col items-center gap-10">
-        
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div
               className="border-4 border-green-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
@@ -176,7 +166,7 @@ const FarmerDashboard = () => {
               className="border-4 border-orange-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
               onClick={() =>
                 navigate("/Community/communitydash", {
-                  state: { user: { name: "John Farmer", role: "farmer" } },
+                  state: { user: { name: firstName, role: "farmer" } },
                 })
               }
             >
@@ -189,14 +179,18 @@ const FarmerDashboard = () => {
             </div>
             <div
               className="border-4 border-red-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
-              onClick={() => navigate("/farmer/helpdesk")}
+              onClick={() =>
+                navigate("/helpdesk", {
+                  state: { user: { id: "farmer1", name: firstName, role: "farmer" } },
+                })
+              }
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/128/17645/17645791.png"
                 alt="Connect to Helpdesk"
                 className="mb-2"
               />
-              <span className="font-medium text-lg">Connect to Helpdesk</span>
+              <span className="font-medium text-lg"> Helpdesk</span>
             </div>
           </div>
           <div

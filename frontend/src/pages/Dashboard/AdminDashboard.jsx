@@ -99,7 +99,11 @@ const AdminDashboard = () => {
 
             <div
               className="border-4 border-purple-700 p-4 bg-white bg-opacity-90 rounded-lg shadow-lg flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300"
-              onClick={() => navigate("/admin/helpdesk")}
+              onClick={() =>
+                navigate("/helpdesk", {
+                  state: { user: { id: "admin", name: "Admin", role: "admin" } },
+                })
+              }
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/128/17645/17645791.png"

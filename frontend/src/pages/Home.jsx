@@ -16,19 +16,19 @@ function Home() {
     >
       {/* Navbar */}
       <nav className="relative bg-green-900 text-white p-4 top-0 left-0 w-full z-10 shadow-lg">
-        <ul className="flex justify-around items-center">
-          <li className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
+        <ul className="flex flex-wrap justify-around items-center space-y-2 sm:space-y-0">
+          <li className="border-2 border-white text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
             <Link to="/">{language === 'en' ? 'Home' : language === 'kn' ? 'ಮನೆ' : 'होम'}</Link>
           </li>
-          <li className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
+          <li className="border-2 border-white text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
             <Link to="/about">{language === 'en' ? 'About' : language === 'kn' ? 'ಬಗ್ಗೆ' : 'के बारे में'}</Link>
           </li>
-          <li className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
+          <li className="border-2 border-white text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors">
             <Link to="/contact">{language === 'en' ? 'Contact' : language === 'kn' ? 'ಸಂಪರ್ಕ' : 'संपर्क करें'}</Link>
           </li>
           <li>
             <select
-              className="border-2 bg-green-900 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
+              className="border-2 bg-green-900 border-white text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
             >
@@ -49,11 +49,11 @@ function Home() {
             className="w-full h-full object-cover opacity-20"
           />
         </div>
-        <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
           <motion.h1
             initial={{ y: -50 }}
             animate={{ y: 0 }}
-            className="text-4xl md:text-6xl font-bold text-center mb-8"
+            className="text-3xl sm:text-4xl md:text-6xl font-bold text-center mb-6 sm:mb-8"
           >
             {language === 'en' && 'AgriConnect: Smart Farming & Analysis Platform'}
             {language === 'kn' && 'ಅಗ್ರಿಕನೆಕ್ಟ್: ಸ್ಮಾರ್ಟ್ ಫಾರ್ಮಿಂಗ್ ಮತ್ತು ವಿಶ್ಲೇಷಣಾ ವೇದಿಕೆ'}
@@ -63,7 +63,7 @@ function Home() {
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-center max-w-3xl mx-auto mb-12"
+            className="text-lg sm:text-xl text-center max-w-2xl sm:max-w-3xl mx-auto mb-8 sm:mb-12"
           >
             {language === 'en' && 'Enhance your farming efficiency with our intelligent agricultural management platform'}
             {language === 'kn' && 'ನಮ್ಮ ಬುದ್ಧಿವಂತ ಕೃಷಿ ನಿರ್ವಹಣಾ ವೇದಿಕೆಯೊಂದಿಗೆ ನಿಮ್ಮ ಕೃಷಿ ದಕ್ಷತೆಯನ್ನು ಹೆಚ್ಚಿಸಿ'}
@@ -73,11 +73,11 @@ function Home() {
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="flex justify-center space-x-4"
+            className="flex flex-wrap justify-center space-y-4 sm:space-y-0 sm:space-x-4"
           >
             <Link
               to="/farmer-login"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
+              className="border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
             >
               {language === 'en' && 'Farmer Login'}
               {language === 'kn' && 'ಕೃಷಿಕ ಲಾಗಿನ್'}
@@ -85,7 +85,7 @@ function Home() {
             </Link>
             <Link
               to="/admin-login"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
+              className="border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
             >
               {language === 'en' && 'Admin Login'}
               {language === 'kn' && 'ನಿರ್ವಾಹಕ ಲಾಗಿನ್'}
@@ -96,12 +96,12 @@ function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
         >
           <FeatureCard
             icon={<Plant className="h-8 w-8 text-emerald-500" />}

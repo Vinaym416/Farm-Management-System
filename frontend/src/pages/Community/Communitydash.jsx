@@ -159,10 +159,10 @@ function Community() {
       }
 
       // Create a basic user object if not present
-      const currentUser = user || { 
-        id: 'guest-' + Date.now(),
-        name: 'Guest',
-        role: 'guest'
+      const currentUser = { 
+        id: user.id || 'guest-' + Date.now(),
+        name: user.name || 'Guest',
+        role: user.role || 'guest'
       };
 
       let imageUrl = null;
@@ -276,7 +276,7 @@ function Community() {
       <Header currentUser={user} />
       <main className="max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold mb-4">
-          Welcome, {user?.name || 'Guest'} ({user?.role || 'guest'})
+          Welcome,  {user?.role || 'guest'}
         </h1>
         <CreatePost onPost={handleCreatePost} />
         
