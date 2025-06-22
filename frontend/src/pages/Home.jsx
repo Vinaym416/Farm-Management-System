@@ -96,7 +96,7 @@ function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+      {/* <div className="max-w-7xl mx-auto py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -124,7 +124,7 @@ function Home() {
             description="Stay updated with real-time weather forecasts"
           />
         </motion.div>
-      </div>
+      </div> */}
     </motion.div>
   );
 }

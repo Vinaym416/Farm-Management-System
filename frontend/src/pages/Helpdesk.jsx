@@ -23,8 +23,8 @@ const Helpdesk = () => {
   useEffect(() => {
     if (user?.role === 'admin') {
       setParticipants([
-        { id: 'farmer1', name: 'Farmer 1' },
-        { id: 'farmer2', name: 'Farmer 2' },
+        { id: 'farmer1', name: 'Farmer ' },
+       
       ]);
     } else if (user?.role === 'farmer') {
       setParticipants([{ id: 'admin', name: 'Admin' }]);

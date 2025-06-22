@@ -114,7 +114,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div
+          {/* <div
             className="fixed bottom-4 right-4 w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform duration-300"
             onClick={() => navigate("/admin/ai-assistant")}
           >
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
               alt="AI Assistant"
               className="w-10 h-10"
             />
-          </div>
+          </div> */}
         </main>
       </div>
     </div>
